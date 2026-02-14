@@ -5,141 +5,64 @@
 {% block content %}
 <div class="container py-5">
 
-    <div class="row mb-4">
-        <div class="col">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'django_auth_tools:index' %}">Home</a></li>
-                    <li class="breadcrumb-item active">Public Page</li>
-                </ol>
-            </nav>
-        </div>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'django_auth_tools:index' %}">Home</a></li>
+            <li class="breadcrumb-item active">Public Page</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-3">Public Page</h1>
+
+    <div class="alert alert-info">
+        {% if user.is_authenticated %}
+            You're logged in as <strong>{{ user.username }}</strong>, but this page
+            doesn't require it.
+        {% else %}
+            You're <strong>not logged in</strong> &mdash; and this page works anyway.
+        {% endif %}
     </div>
 
-    <div class="row mb-4">
-        <div class="col">
-            <div class="alert alert-info d-flex align-items-center" role="alert">
-                <i class="bi bi-unlock-fill fs-4 me-3"></i>
-                <div>
-                    <strong>No login required!</strong> This page is accessible to everyone.
-                    {% if user.is_authenticated %}
-                        (You happen to be logged in as <span class="badge bg-dark">{{ user.username }}</span>.)
-                    {% else %}
-                        You are currently <strong>not authenticated</strong> &mdash; and that's fine!
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-5">
+    <div class="row mt-4">
         <div class="col-lg-8">
-            <h1 class="fw-bold mb-3"><i class="bi bi-unlock me-2"></i>Public Page</h1>
-            <p class="lead text-secondary">
-                This view uses <code>NoLoginRequiredMixin</code> to opt out of the
-                <code>LoginRequiredMiddleware</code>.
+            <h5>How does this page opt out?</h5>
+            <p>
+                The view uses <code>NoLoginRequiredMixin</code>, which sets
+                <code>no_login_required = True</code> on the class. The middleware sees that
+                and lets the request through.
             </p>
-        </div>
-    </div>
 
-    <!-- How this page opts out -->
-    <div class="row mb-5">
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-dark text-light">
-                    <i class="bi bi-file-earmark-code me-1"></i> Class-Based View (Mixin)
-                </div>
-                <div class="card-body">
-<pre class="bg-light p-3 rounded mb-3"><code>from django_auth_tools.mixins import NoLoginRequiredMixin
+            <p><strong>Class-based view:</strong></p>
+<pre><code>from django_auth_tools.mixins import NoLoginRequiredMixin
 
-class PublicView(<strong>NoLoginRequiredMixin</strong>, TemplateView):
+class PublicView(NoLoginRequiredMixin, TemplateView):
     template_name = "public.html"</code></pre>
-                    <p class="text-secondary mb-0">
-                        The mixin sets <code>no_login_required = True</code> on the view class.
-                        The middleware detects this attribute and skips the redirect.
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-dark text-light">
-                    <i class="bi bi-file-earmark-code me-1"></i> Function-Based View (Decorator)
-                </div>
-                <div class="card-body">
-<pre class="bg-light p-3 rounded mb-3"><code>from django_auth_tools.decorators import no_login_required
 
-<strong>@no_login_required</strong>
+            <p class="mt-3"><strong>Function-based view:</strong></p>
+<pre><code>from django_auth_tools.decorators import no_login_required
+
+@no_login_required
 def public_page(request):
     return render(request, "public.html")</code></pre>
-                    <p class="text-secondary mb-0">
-                        The decorator sets <code>no_login_required = True</code> on the wrapped
-                        function. Works the same way for function-based views.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- How the middleware decides -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-light">
-                    <i class="bi bi-diagram-2 me-1"></i> Decision Flow
-                </div>
-                <div class="card-body p-4">
-                    <div class="row text-center">
-                        <div class="col-md-3 mb-3">
-                            <div class="p-3 bg-light rounded">
-                                <i class="bi bi-arrow-right-circle text-primary fs-2 mb-2 d-block"></i>
-                                <strong>Request comes in</strong>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="p-3 bg-light rounded">
-                                <i class="bi bi-person-check text-warning fs-2 mb-2 d-block"></i>
-                                <strong>Authenticated?</strong>
-                                <div class="text-secondary small">If yes &rarr; pass through</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="p-3 bg-light rounded">
-                                <i class="bi bi-search text-info fs-2 mb-2 d-block"></i>
-                                <strong>View opted out?</strong>
-                                <div class="text-secondary small">Check for <code>no_login_required</code></div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="p-3 bg-light rounded">
-                                <i class="bi bi-sign-turn-right text-danger fs-2 mb-2 d-block"></i>
-                                <strong>Redirect to login</strong>
-                                <div class="text-secondary small">With <code>?next=</code> parameter</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <p class="text-muted mt-3">
+                Both approaches do the same thing &mdash; they set an attribute that the
+                middleware checks before deciding whether to redirect.
+            </p>
 
-    <!-- Next step -->
-    <div class="row">
-        <div class="col text-center">
-            {% if user.is_authenticated %}
-                <p class="text-secondary">Try logging out and visiting the protected Dashboard.</p>
-                <form method="post" action="{% url 'logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-box-arrow-right me-1"></i>Log Out
-                    </button>
-                </form>
-            {% else %}
-                <p class="text-secondary">Now try accessing the protected Dashboard without logging in.</p>
-            {% endif %}
-            <a href="{% url 'django_auth_tools:dashboard' %}" class="btn btn-outline-danger btn-lg ms-2">
-                <i class="bi bi-lock me-1"></i>Go to Dashboard
-            </a>
+            <div class="mt-4">
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-sm me-2">
+                            Log out
+                        </button>
+                    </form>
+                {% endif %}
+                <a href="{% url 'django_auth_tools:dashboard' %}" class="btn btn-outline-dark btn-sm">
+                    Try the Dashboard (protected) &rarr;
+                </a>
+            </div>
         </div>
     </div>
 
