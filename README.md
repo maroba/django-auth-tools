@@ -1,6 +1,10 @@
 # django-auth-tools
 
-Some tools for authentication in Django projects
+A Django middleware that makes login required the default. Instead of decorating
+every view with `@login_required`, you add one middleware and then mark the
+exceptions — the views that should be public.
+
+Requires Django 4.2+ and Python 3.10+.
 
 ## Installation
 
@@ -8,66 +12,111 @@ Some tools for authentication in Django projects
 pip install django-auth-tools
 ```
 
-Or for development:
+## Usage
 
-```bash
-git clone <your-repo-url>
-cd django-auth-tools
-pip install -e .
-```
+### 1. Add the middleware
 
-## Quick Start
-
-1. Add `django_auth_tools` to your `INSTALLED_APPS`:
+In your `settings.py`, add `LoginRequiredMiddleware` **after**
+`AuthenticationMiddleware`:
 
 ```python
 INSTALLED_APPS = [
     ...
     "django_auth_tools",
 ]
+
+MIDDLEWARE = [
+    ...
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_auth_tools.middleware.LoginRequiredMiddleware",
+    ...
+]
+
+LOGIN_URL = "/accounts/login/"
 ```
 
-2. Include the URLconf in your project `urls.py`:
+That's it — every view now requires an authenticated user. Unauthenticated
+requests get redirected to `LOGIN_URL` with a `?next=` parameter.
+
+### 2. Mark public views
+
+For views that should be accessible without login, use the decorator (FBV) or
+the mixin (CBV):
 
 ```python
-from django.urls import include, path
+# Function-based view
+from django_auth_tools.decorators import no_login_required
 
-urlpatterns = [
+@no_login_required
+def landing_page(request):
     ...
-    path("django_auth_tools/", include("django_auth_tools.urls")),
-]
 ```
 
-3. Run migrations:
+```python
+# Class-based view
+from django_auth_tools.mixins import NoLoginRequiredMixin
 
-```bash
-python manage.py migrate
+class LandingPage(NoLoginRequiredMixin, TemplateView):
+    template_name = "landing.html"
 ```
 
-4. Start the development server:
+### How it works
 
-```bash
-python manage.py runserver
-```
+The middleware runs on every request. If the user is not authenticated, it
+resolves the URL and checks the view for a `no_login_required` attribute. If
+the attribute is present (set by the decorator or mixin), the request passes
+through. Otherwise, it redirects to the login page.
+
+---
 
 ## Development
 
-### Using the Sample Project
+### Setup
 
-A sample Django project is included for development and testing:
+```bash
+git clone https://github.com/mbaer/django-auth-tools.git
+cd django-auth-tools
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+### Sample project
+
+There's a small Django project in `sample_project/` that demonstrates the
+middleware. It has a protected page, a public page, and a login form.
 
 ```bash
 cd sample_project
-pip install -r requirements.txt
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-### Running Tests
+### Running tests
 
 ```bash
+# With coverage
+PYTHONPATH=sample_project:$PYTHONPATH \
+  coverage run --source=django_auth_tools -m django test django_auth_tools \
+  --settings=sample_project.settings
+coverage report
+
+# Across multiple Python/Django versions
 pip install tox
 tox
+```
+
+### Project structure
+
+```
+django_auth_tools/
+├── middleware.py      # LoginRequiredMiddleware
+├── decorators.py      # @no_login_required
+├── mixins.py          # NoLoginRequiredMixin
+├── views.py           # Demo views used by the sample project
+└── tests/
+    └── test_middleware.py
 ```
 
 ## License
