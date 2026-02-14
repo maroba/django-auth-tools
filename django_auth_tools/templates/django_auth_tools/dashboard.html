@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard – django-auth-tools{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'django_auth_tools:index' %}">Home</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Access granted!</strong> You are authenticated as
+                    <span class="badge bg-dark">{{ user.username }}</span>.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-3"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+            <p class="lead text-secondary">
+                This page is protected by the <code>LoginRequiredMiddleware</code>.
+                Only authenticated users can see it.
+            </p>
+        </div>
+    </div>
+
+    <!-- How this page is protected -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-light">
+                    <i class="bi bi-info-circle me-1"></i> Why This Page Is Protected
+                </div>
+                <div class="card-body">
+                    <p>
+                        The <code>DashboardView</code> is a plain <code>TemplateView</code> &mdash;
+                        it does <strong>not</strong> use <code>NoLoginRequiredMixin</code> or
+                        <code>@no_login_required</code>.
+                    </p>
+<pre class="bg-light p-3 rounded"><code>class DashboardView(TemplateView):
+    template_name = "django_auth_tools/dashboard.html"</code></pre>
+                    <p class="mb-0 text-secondary">
+                        Because no opt-out is present, <code>LoginRequiredMiddleware</code>
+                        redirects unauthenticated users to the login page automatically.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-danger border-opacity-50 shadow-sm h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <i class="bi bi-lock-fill text-danger display-1 mb-3"></i>
+                    <h5>Protected by Default</h5>
+                    <p class="text-secondary mb-0">
+                        With the middleware active, <em>every</em> view is protected unless explicitly marked as public.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next step -->
+    <div class="row">
+        <div class="col text-center">
+            <p class="text-secondary">Now try visiting the public page &mdash; it works without login.</p>
+            <a href="{% url 'django_auth_tools:public' %}" class="btn btn-outline-success btn-lg">
+                <i class="bi bi-unlock me-1"></i>Go to Public Page
+            </a>
+            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary btn-lg ms-2">
+                    <i class="bi bi-box-arrow-right me-1"></i>Log Out &amp; Try Again
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

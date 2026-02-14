@@ -1,0 +1,4 @@
+include LICENSE
+include README.md
+recursive-include django_auth_tools/templates *
+recursive-include django_auth_tools/static *

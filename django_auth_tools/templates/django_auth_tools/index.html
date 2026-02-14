@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}django-auth-tools – Demo{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="hero-gradient text-white py-5 mb-5">
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-shield-lock me-2"></i>django-auth-tools
+                </h1>
+                <p class="lead mb-4">
+                    A Django middleware that redirects all unauthenticated requests to the login page &mdash;
+                    unless the view explicitly opts out.
+                </p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'django_auth_tools:dashboard' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-lock me-1"></i>Try Protected Page
+                    </a>
+                    <a href="{% url 'django_auth_tools:public' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-unlock me-1"></i>Try Public Page
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block text-center">
+                <i class="bi bi-diagram-3 display-1 opacity-25" style="font-size: 10rem;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+
+    <!-- How it works -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4"><i class="bi bi-gear me-2"></i>How It Works</h2>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width: 64px; height: 64px;">
+                        <i class="bi bi-funnel text-primary fs-3"></i>
+                    </div>
+                    <h5 class="card-title">1. Middleware Intercepts</h5>
+                    <p class="card-text text-secondary">
+                        <code>LoginRequiredMiddleware</code> checks every incoming request.
+                        If the user is not authenticated, it redirects to <code>LOGIN_URL</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width: 64px; height: 64px;">
+                        <i class="bi bi-unlock text-success fs-3"></i>
+                    </div>
+                    <h5 class="card-title">2. Opt-Out for Public Views</h5>
+                    <p class="card-text text-secondary">
+                        Use <code>@no_login_required</code> (FBV) or <code>NoLoginRequiredMixin</code> (CBV)
+                        to mark views as publicly accessible.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width: 64px; height: 64px;">
+                        <i class="bi bi-arrow-return-right text-warning fs-3"></i>
+                    </div>
+                    <h5 class="card-title">3. Redirect with <code>?next=</code></h5>
+                    <p class="card-text text-secondary">
+                        The original URL is preserved via the <code>next</code> query parameter,
+                        so users return to their intended destination after login.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4"><i class="bi bi-code-slash me-2"></i>Setup</h2>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-light">
+                    <i class="bi bi-file-earmark-code me-1"></i> settings.py
+                </div>
+                <div class="card-body">
+<pre class="mb-0"><code>MIDDLEWARE = [
+    ...
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    <strong>"django_auth_tools.middleware.LoginRequiredMiddleware"</strong>,
+    ...
+]
+
+LOGIN_URL = "/accounts/login/"</code></pre>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-light">
+                    <i class="bi bi-file-earmark-code me-1"></i> views.py
+                </div>
+                <div class="card-body">
+<pre class="mb-0"><code># Function-Based View
+from django_auth_tools.decorators import no_login_required
+
+@no_login_required
+def public_page(request):
+    ...
+
+# Class-Based View
+from django_auth_tools.mixins import NoLoginRequiredMixin
+
+class PublicPage(NoLoginRequiredMixin, TemplateView):
+    template_name = "public.html"</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Pages -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4"><i class="bi bi-play-circle me-2"></i>Try It Out</h2>
+            <p class="text-secondary mb-4">
+                This sample project demonstrates the middleware in action.
+                {% if not user.is_authenticated %}
+                    You are currently <strong>not logged in</strong> &mdash; try visiting the protected page!
+                    <br>Demo credentials: <code>admin</code> / <code>admin</code>
+                {% else %}
+                    You are logged in as <strong>{{ user.username }}</strong>.
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-danger border-opacity-50 shadow-sm">
+                <div class="card-body">
+                    <span class="badge bg-danger mb-2"><i class="bi bi-lock me-1"></i>Protected</span>
+                    <h5 class="card-title">Dashboard</h5>
+                    <p class="card-text text-secondary">
+                        A standard view <em>without</em> any opt-out. Unauthenticated users
+                        are redirected to the login page.
+                    </p>
+                    <a href="{% url 'django_auth_tools:dashboard' %}" class="btn btn-outline-danger">
+                        Visit Dashboard <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100 border-success border-opacity-50 shadow-sm">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2"><i class="bi bi-unlock me-1"></i>Public</span>
+                    <h5 class="card-title">Public Page</h5>
+                    <p class="card-text text-secondary">
+                        Uses <code>NoLoginRequiredMixin</code> to opt out. Accessible to
+                        everyone, even without authentication.
+                    </p>
+                    <a href="{% url 'django_auth_tools:public' %}" class="btn btn-outline-success">
+                        Visit Public Page <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Components Reference -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4"><i class="bi bi-box me-2"></i>Components</h2>
+        </div>
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Component</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>LoginRequiredMiddleware</code></td>
+                            <td><span class="badge bg-primary">Middleware</span></td>
+                            <td>Intercepts all requests; redirects unauthenticated users to <code>LOGIN_URL</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>@no_login_required</code></td>
+                            <td><span class="badge bg-info text-dark">Decorator</span></td>
+                            <td>Marks a function-based view as publicly accessible (no login needed).</td>
+                        </tr>
+                        <tr>
+                            <td><code>NoLoginRequiredMixin</code></td>
+                            <td><span class="badge bg-warning text-dark">Mixin</span></td>
+                            <td>Marks a class-based view as publicly accessible (no login needed).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
