@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "django-auth-tools"
 version = "0.1.0"
-description = "Some tools for authentication in Django projects"
+description = "Django middleware that makes login required by default"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Matthias Baer/django-auth-tools"
-Repository = "https://github.com/Matthias Baer/django-auth-tools"
-Issues = "https://github.com/Matthias Baer/django-auth-tools/issues"
+Homepage = "https://github.com/maroba/django-auth-tools"
+Repository = "https://github.com/maroba/django-auth-tools"
+Issues = "https://github.com/maroba/django-auth-tools/issues"
 
 [tool.setuptools.packages.find]
 include = ["django_auth_tools*"]
